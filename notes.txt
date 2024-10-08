@@ -1,3 +1,5 @@
+YT video: https://www.youtube.com/watch?v=oqqet79lmmU
+----------
 in package.json:
 - `"dev-node": "tsx watch src/server"` ->
     `tsx` tells to run node with typescript,
@@ -28,3 +30,43 @@ in task.ts:
         if (task.title.length < 3) throw Error("Title too short")
     }
 })`
+
+authentication: add `Allow.authenticated` from remult
+- @BackendMethod({ allowed: Allow.authenticated })
+- @Entity("tasks", { allowApiCrud: Allow.authenticated })
+
+package: npm i cookie-session -> handles cookie sessions in node.js
+
+- middleware on who to add/delete tasks
+@Entity("tasks", {
+    allowApiCrud: Allow.authenticated,
+    allowApiDelete: "admin",
+    allowApiInsert: "admin"
+})
+
+- roles on who is able to add/delete tasks: `roles: ["admin"]`
+`const validUsers: UserInfo[] = [
+    { id: "1", name: "Andrej", roles: ["admin"] },
+    { id: "2", name: "Steve" }
+]`
+
+- on the FE - only show the form if the user has privileges to add task:
+`v-if="taskRepo.metadata.apiInsertAllowed()"`
+and also for DELETE this:
+`
+<button
+    v-if="taskRepo.metadata.apiDeleteAllowed()"
+    @click="deleteTask(task)"
+>Delete</button>
+`
+
+----------
+Postgres:
+- npm i pg
+in api.ts -> app.use - ...
+- dataProvider: createPostgresConnection({
+          connectionString: "jdbc:postgresql://localhost:5432/postgres"
+      })
+----------
+Deployment:
+The last thing is deployment and how to deploy the app. You can deploy it for free.

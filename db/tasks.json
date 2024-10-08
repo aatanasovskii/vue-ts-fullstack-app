@@ -1,12 +1,12 @@
 [
   {
     "title": "Clean car",
-    "completed": false,
+    "completed": true,
     "id": 1
   },
   {
     "title": "Read a book",
-    "completed": false,
+    "completed": true,
     "id": 2
   },
   {
@@ -21,7 +21,7 @@
   },
   {
     "title": "Do laundry",
-    "completed": false,
+    "completed": true,
     "id": 5
   }
 ]
