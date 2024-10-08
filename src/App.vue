@@ -1,85 +1,79 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import {onMounted, onUnmounted, ref} from "vue";
+import {remult} from "remult";
+import {Task} from "@/shared/task";
+import {TasksController} from "@/shared/TasksController";
+
+const tasks = ref<Task[]>([])
+
+const taskRepo = remult.repo(Task) // tells remult to return a repository of type Task. To get,post... data from the backend
+
+onMounted(() =>
+    onUnmounted(
+        taskRepo.liveQuery({
+          // where:{
+          //   completed: false
+          // },
+          // page:2, // pagination is like this
+          limit: 20,
+          orderBy: {
+            completed: "asc"
+          }
+        })
+            .subscribe((info) => (tasks.value = info.applyChanges(tasks.value)))
+    ))
+
+const newTaskTitle = ref("");
+
+async function addTask() {
+  try {
+    const newTask = await taskRepo.insert({title: newTaskTitle.value})
+    newTaskTitle.value = ""
+  } catch (error: unknown) {
+    alert((error as { message: string }).message)
+  }
+}
+
+async function saveTask(task: Task) {
+  try {
+    await taskRepo.save(task)
+  } catch (error: unknown) {
+    alert((error as { message: string }).message)
+  }
+}
+
+async function deleteTask(task: Task) {
+  try {
+    await taskRepo.delete(task)
+  } catch (error: unknown) {
+    alert((error as { message: string }).message)
+  }
+}
+
+async function setAllCompleted(completed: boolean) {
+  await TasksController.setAllCompleted(completed)
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <h1>Todos</h1>
+  <main>
+    <form @submit.prevent="addTask()">
+      <input v-model="newTaskTitle" placeholder="What needs to be done?"/>
+      <button>Add</button>
+    </form>
+    <div v-for="task in tasks">
+      <input type="checkbox" v-model="task.completed" @change="saveTask(task)">
+      <input v-model="task.title">
+      <button @click="saveTask(task)">Save</button>
+      <button @click="deleteTask(task)">Delete</button>
     </div>
-  </header>
-
-  <RouterView />
+    <div>
+      <button @click="$event => setAllCompleted(true)">Set All Completed</button>
+      <button @click="$event => setAllCompleted(false)">Set All UnCompleted</button>
+    </div>
+  </main>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
 </style>

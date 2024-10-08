@@ -1,0 +1,30 @@
+in package.json:
+- `"dev-node": "tsx watch src/server"` ->
+    `tsx` tells to run node with typescript,
+    `watch` refresh on every change to code we make,
+    `src/server` where it is the code (index.js) file.
+
+in index.ts
+const app = express();
+- app.get("/api/hi",(req, res) => res.send("Hello")); -> basic route - when we go on `http://localhost:3002/api/hi` - "Hello" will be displayed.
+
+in `vite.config.ts`:
+- server:{proxy:{"/api":"http://localhost:3002"}} -> everything that reaches the /api, should go to "http://localhost:3002"
+so this `http://localhost:5173/api/hi` would give me the result that is here "/api/hi".
+
+
+- http client -> ⌘-Сmd + ⇧-Shift + N and select HTTP Request. We can add dummy data (POST request) to the 'database' - db-tasks.json
+
+CRUD:
+- add: await taskRepo.insert({ title: newTaskTitle.value })
+- delete: await taskRepo.delete(task)
+- save: await taskRepo.save(task)
+
+
+Validations:
+in task.ts:
+`@Fields.string<Task>({
+    validate: (task) => {
+        if (task.title.length < 3) throw Error("Title too short")
+    }
+})`
